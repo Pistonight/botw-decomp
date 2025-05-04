@@ -22,6 +22,7 @@ public:
     bool isProcReady() const;
     bool hasProcCreationFailed() const;
     bool isProcCreationCancelled() const;
+    bool isAllocatedOrFailed() const { return mUnit || mFailed; }
 
     void deleteProcIfFailed();
     void deleteProc();

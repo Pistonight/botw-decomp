@@ -4,7 +4,8 @@
 #include <limits>
 #include <math/seadMathCalcCommon.h>
 #include <prim/seadScopedLock.h>
-#include "Game/Actor/actCreatePlayerEquipActorMgr.h"
+#include "Game/Actor/actCreateUtils.h"
+#include "Game/Actor/actPlayerCreate.h"
 #include "Game/Actor/actWeapon.h"
 #include "Game/Cooking/cookManager.h"
 #include "Game/DLC/aocManager.h"
