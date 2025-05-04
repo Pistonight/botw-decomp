@@ -129,6 +129,8 @@ public:
     InstParamPack() = default;
     virtual ~InstParamPack() = default;
 
+    InstParamPack& operator=(const InstParamPack& other) = default;
+
     Buffer& getBuffer() { return mBuffer; }
     const Buffer& getBuffer() const { return mBuffer; }
 
