@@ -23,11 +23,14 @@ void CreatePlayerEquipActorMgr::init() {
     _318 = 3;
     mDebugStatus = "◎読み込み中◎"; // Loading
     _330 = 0.9;
+
     _334 = 0;
+
     _338 = 1;
     _33C = 1;
     _340 = 1;
     _344 = 1;
+
     _348 = 0.2;
     _34C = 0.2;
     _350 = 0.2;
