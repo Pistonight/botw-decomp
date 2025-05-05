@@ -85,5 +85,15 @@ private:
     ActorFactory* mActorFactory;
 };
 KSYS_CHECK_SIZE_NX150(ActorCreator, 0xf0);
+void requestCreateActor(
+    const char* actor_class,
+    const sead::Matrix34f& matrix,
+    f32 scale,
+    sead::Heap* heap,
+    ksys::act::BaseProcHandle* handle,
+    s32 life,
+    ksys::act::InstParamPack* params_in,
+    s32 task_lane_id
+);
 
 }  // namespace ksys::act

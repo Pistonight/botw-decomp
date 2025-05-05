@@ -102,8 +102,6 @@ target_sources(uking PRIVATE
     actCCAccessor.h
     actClusteredRenderer.cpp
     actClusteredRenderer.h
-    actCreate.cpp
-    actCreate.h
     actDebug.cpp
     actDebug.h
     actGlobalParameter.cpp

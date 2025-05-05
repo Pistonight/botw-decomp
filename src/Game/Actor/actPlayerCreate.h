@@ -4,10 +4,17 @@
 #include <prim/seadSafeString.h>
 #include <prim/seadBitFlag.h>
 #include <prim/seadStringBuilder.h>
+#include <math/seadMatrix.h>
 #include <container/seadSafeArray.h>
 #include "KingSystem/ActorSystem/actBaseProcHandle.h"
 #include "KingSystem/ActorSystem/actBaseProcLink.h"
 #include "KingSystem/Utils/Types.h"
+#include "math/seadVectorFwd.h"
+
+namespace ksys::act {
+class InstParamPack;
+class Actor;
+}
 
 namespace uking::ui {
 
@@ -30,12 +37,21 @@ enum class CreateEquipmentSlot : u8 {
     Length = 6,
 };
 
+inline bool isArmorCreateEquipmentSlot(s32 slot) {
+    return slot == (s32)CreateEquipmentSlot::ArmorHead || slot == (s32)CreateEquipmentSlot::ArmorUpper ||
+           slot == (s32)CreateEquipmentSlot::ArmorLower;
+}
+
 class PlayerCreateTracker {
 public:
-    // TODO 71010C2A10;
-    PlayerCreateTracker();
+    PlayerCreateTracker() {
+        u = 0;
+    }
     // TODO 71010C2A18 probably
     ~PlayerCreateTracker() = default;
+
+    // TODO 71010C2A10;
+    PlayerCreateTracker(const sead::SafeString& name, u64 x);
 
     u64 u = 0;
 
@@ -66,15 +82,14 @@ class CreatePlayerEquipActorMgr {
 
 public:
     void init();
-    // postCalc();
-    void deleteAllEquipments();
-    void deleteEquipment(s32 slot_idx);
+    void postCalc();
+    void resetAll();
+    void reset(s32 slot_idx);
     bool areAllEquipmentActorsReady() const;
     bool areEquipmentActorsReady(s32 slot_idx) const;
     bool isEquipmentProcReady(s32 slot_idx) const;
-    // wakeEquipment
+    ksys::act::Actor* tryGetEquipmentActor(s32 slot_idx);
 
-    // TODO 0x71006669F8
     void doRequestCreateWeapon(s32 slot_idx, 
                                const sead::SafeString& name, 
                                int value,
@@ -85,31 +100,39 @@ public:
                                int value,
                                const WeaponModifierInfo* modifier, 
                                const sead::SafeString& caller);
+void doRequestCreateArmorByRawLife(
+        s32 slot_idx, 
+        const sead::SafeString& actor_name, const sead::Vector3f& pos, 
+        /* s32 dye_color, */
+    ksys::act::InstParamPack* params,
+        s32 raw_life
+    );
 
-    // TODO 0x7100666CF8
     void doRequestCreateArmor(s32 slot_idx, const sead::SafeString& name, int dye_color,
                               const sead::SafeString& caller);
-    // requestCreateArmor
+    void requestCreateArmor(const sead::SafeString& name, 
+                               int dye_color,
+                               const sead::SafeString& caller);
 
     void requestCreateDefaultArmor(s32 slot_idx, const sead::SafeString& caller);
     void requestCreateArmorHeadB(const sead::SafeString& name, int dye_color,
                                  const sead::SafeString& caller);
 
 private:
-    enum class EntryStatus : u32 {
-        _0 = 0,
+    enum class EntryStatus : s32 {
+        Idle = 0,
         Loading = 1,
         Ready = 2
     };
     class Entry {
         friend class CreatePlayerEquipActorMgr;
         sead::FixedStringBuilder<64> mS;
-        EntryStatus mStatus = EntryStatus::_0;
+        EntryStatus mStatus = EntryStatus::Idle;
         ksys::act::BaseProcLink mProcLink;
 
         void reset() {
             mS.clear();
-            mStatus = EntryStatus::_0;
+            mStatus = EntryStatus::Idle;
             mProcLink.reset();
         }
     };
@@ -120,10 +143,15 @@ private:
         virtual ~StringBoard_Temp() = default;
     };
 
-    sead::SafeArray<ksys::act::BaseProcHandle, 6> mProcHandles{};
-    sead::BitFlag8 mFlag;
+    bool isSlotLoading(s32 slot_idx) const {
+        return mIsLoading.isOnBit(slot_idx) && mEntries[slot_idx].mStatus == EntryStatus::Loading;
+    }
+
+    sead::SafeArray<ksys::act::BaseProcHandle, 6> mProcHandles;
+    sead::BitFlag8 mIsLoading;
     PlayerCreateTracker mTracker;
-    sead::SafeArray<Entry, (u64)CreateEquipmentSlot::Length> mEntries{};
+    sead::SafeArray<Entry, (u64)CreateEquipmentSlot::Length> mEntries;
+
     StringBoard_Temp mStringBoard;
     void* _310 = nullptr;
     s32 _318 = 3; // some enum
@@ -178,5 +206,18 @@ bool isArmorUpperNotUseMantleType0(const sead::SafeString& armor_upper_name);
 CreateEquipmentSlot getCreateEquipmentSlot(ui::PouchItemType type);
 ui::EquipmentSlot getEquipmentSlot(CreateEquipmentSlot slot);
 bool createEquipmentFromItem(const ui::PouchItem* item, const sead::SafeString& caller);
+
+void requestCreateWeaponByRawLife(
+    const char* actor_class,
+    const sead::Matrix34f& matrix,
+    f32 scale,
+    sead::Heap* heap,
+    ksys::act::BaseProcHandle* handle,
+    s32 life,
+    bool is_player_put,
+    const WeaponModifierInfo* modifier,
+    s32 task_lane_id,
+    s32 raw_life
+);
 
 }

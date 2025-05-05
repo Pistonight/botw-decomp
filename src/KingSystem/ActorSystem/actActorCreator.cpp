@@ -228,4 +228,27 @@ void ActorCreator::setCreatePriorityState2(InstParamPack& pack, BaseProc* proc) 
     pack.getBuffer().add(true, "@W");
 }
 
+void requestCreateActor(
+    const char* actor_class,
+    const sead::Matrix34f& matrix,
+    f32 scale,
+    sead::Heap* heap,
+    ksys::act::BaseProcHandle* handle,
+    s32 life,
+    ksys::act::InstParamPack* params_in,
+    s32 task_lane_id
+) {
+    ksys::act::InstParamPack params;
+    if (params_in) {
+        params = *params_in;
+        /* params.setProc(params_in->getProc()); */
+        /* params.getBuffer() = params_in->getBuffer(); */
+    }
+    ksys::act::ActorCreator::addScale(params, scale);
+    params->add(life, "Life");
+    params->add(matrix, "@M");
+    ksys::act::ActorCreator::instance()->requestCreateActor(
+        actor_class, heap, handle, &params, nullptr, task_lane_id);
+}
+
 }  // namespace ksys::act
