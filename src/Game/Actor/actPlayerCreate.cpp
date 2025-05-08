@@ -20,7 +20,7 @@ namespace uking::act {
 SEAD_SINGLETON_DISPOSER_IMPL(CreatePlayerEquipActorMgr)
 
 CreatePlayerEquipActorMgr::CreatePlayerEquipActorMgr() {
-    mTracker = PlayerCreateTracker("CreatePlayerEquipActorMgr", 0);
+    mTracker = PlayerCreateTracker::make("CreatePlayerEquipActorMgr", 0);
     /* memset((char*)&mProcHandles.mBuffer, 0, sizeof(mProcHandles)); */
     /* mNullptr = stubbedInitWithName("CreatePlayerEquipActorMgr", 0); */
 }
@@ -206,7 +206,7 @@ void CreatePlayerEquipActorMgr::doRequestCreateWeapon(s32 slot_idx,
 
     if (mProcHandles[slot_idx].isSettled()) {
         auto& entry = mEntries[slot_idx];
-        entry.mS.copy(name.cstr());
+        entry.mActorName.copy(name.cstr());
         mIsLoading.setBit(slot_idx);
         entry.mStatus = EntryStatus::Loading;
     }
@@ -316,7 +316,7 @@ void CreatePlayerEquipActorMgr::doRequestCreateArmor(s32 slot_idx, const sead::S
     }
     if (mProcHandles[slot_idx].isSettled()) {
         auto& entry = mEntries[slot_idx];
-        entry.mS.copy(name.cstr());
+        entry.mActorName.copy(name.cstr());
         mIsLoading.setBit(slot_idx);
         entry.mStatus = EntryStatus::Loading;
     }

@@ -48,29 +48,26 @@ public:
         u = 0;
     }
     // TODO 71010C2A18 probably
-    ~PlayerCreateTracker() = default;
+    ~PlayerCreateTracker();
 
     // TODO 71010C2A10;
-    PlayerCreateTracker(const sead::SafeString& name, u64 x);
+    static PlayerCreateTracker make(const sead::SafeString& name, u64 x);
 
     u64 u = 0;
 
     class Scope {
     public:
         // 71010C2A1C
-        Scope(u64 u, const sead::SafeString& name, const sead::SafeString& caller, s32 level);
+        Scope(u64 tracker, const sead::SafeString& name, const sead::SafeString& caller, s32 level);
         // 71010C2A34, 71010C2A48
         virtual ~Scope();
 
 
     private:
-        u64 _;
+        u64 mTracker;
     };
     KSYS_CHECK_SIZE_NX150(Scope, 0x10);
 
-    Scope makeScope(const sead::SafeString& name, const sead::SafeString& caller) {
-        return { u, name, caller, 1 };
-    }
 };
 KSYS_CHECK_SIZE_NX150(PlayerCreateTracker, 0x8);
 
@@ -126,12 +123,12 @@ private:
     };
     class Entry {
         friend class CreatePlayerEquipActorMgr;
-        sead::FixedStringBuilder<64> mS;
+        sead::FixedStringBuilder<64> mActorName;
         EntryStatus mStatus = EntryStatus::Idle;
         ksys::act::BaseProcLink mProcLink;
 
         void reset() {
-            mS.clear();
+            mActorName.clear();
             mStatus = EntryStatus::Idle;
             mProcLink.reset();
         }
