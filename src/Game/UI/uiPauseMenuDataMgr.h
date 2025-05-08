@@ -333,6 +333,7 @@ public:
                          bool check_effect_type = false) const;
     int countItemsWithCategory(PouchCategory category) const;
     PouchCategory getCategoryForType(PouchItemType type) const;
+    PouchItemType getTypeForCategory(PouchCategory category) const;
 
     void removeCookResult(const sead::SafeString& name = {}, s32 effect_type = 0x11,
                           bool check_effect = false);
@@ -513,19 +514,19 @@ private:
     sead::SafeArray<PouchItem*, NumTabMax> mTabs;
     sead::SafeArray<PouchItemType, NumTabMax> mTabsType;
     PouchItem* mLastAddedItem{};
-    s32 mLastAddedItemTab = -1;
-    s32 mLastAddedItemSlot = -1;
+    s32 mLastAddedItemTabIndex = -1;
+    s32 mLastAddedItemSlot = -1; // Position in the tab, 0<=slot<20
     s32 mNumTabs = 0;
     sead::SafeArray<GrabbedItemInfo, NumGrabbableItems> mGrabbedItems;
     PouchItem* mItem_444f0{};
     s32 _444f8 = -1;
     s32 _444fc{};
     s32 _44500 = -1;
-    u32 _44504{};
-    u32 _44508{};
-    u32 _4450c{};
-    u32 _44510{};
-    u32 _44514{};
+    s32 mNumSmallSwords{};
+    s32 mNumLargeSwords{};
+    s32 mNumSpears{};
+    s32 mNumShields{};
+    s32 mNumBows{};
     PouchItem* mRitoSoulItem{};
     PouchItem* mGoronSoulItem{};
     PouchItem* mZoraSoulItem{};

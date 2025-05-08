@@ -16,6 +16,7 @@
 #include "KingSystem/ActorSystem/actActorHeapUtil.h"
 #include "KingSystem/ActorSystem/actActorUtil.h"
 #include "KingSystem/ActorSystem/actBaseProcLink.h"
+#include "KingSystem/ActorSystem/actGlobalParameter.h"
 #include "KingSystem/ActorSystem/actInfoCommon.h"
 #include "KingSystem/ActorSystem/actInfoData.h"
 #include "KingSystem/ActorSystem/actPlayerInfo.h"
@@ -25,6 +26,7 @@
 #include "KingSystem/GameData/gdtSpecialFlags.h"
 #include "KingSystem/GameData/gdtTriggerParam.h"
 #include "KingSystem/System/PlayReportMgr.h"
+#include "KingSystem/Resource/GeneralParamList/resGParamListObjectGlobal.h"
 #include "KingSystem/Utils/Byaml/Byaml.h"
 #include "KingSystem/Utils/HeapUtil.h"
 #include "KingSystem/Utils/InitTimeInfo.h"
@@ -101,11 +103,11 @@ struct PouchStaticData {
     sead::SafeString Obj_DLC_HeroSoul_Gerudo = "Obj_DLC_HeroSoul_Gerudo";
     sead::SafeString Obj_WarpDLC = "Obj_WarpDLC";
 
-    sead::SafeString Armor_116_Upper = "Armor_116_Upper";
-    sead::SafeString Armor_148_Upper = "Armor_148_Upper";
-    sead::SafeString Armor_149_Upper = "Armor_149_Upper";
-    sead::SafeString Armor_150_Upper = "Armor_150_Upper";
-    sead::SafeString Armor_151_Upper = "Armor_151_Upper";
+    sead::SafeString champion_tunics[5] { "Armor_116_Upper"
+    , "Armor_148_Upper"
+    , "Armor_149_Upper"
+    , "Armor_150_Upper"
+     , "Armor_151_Upper"};
 
     sead::Buffer<CookTagInfo> cook_item_order{sCookItemOrder_.size(),
                                               sCookItemOrder_.getBufferPtr()};
@@ -298,11 +300,11 @@ void PauseMenuDataMgr::initForNewSave() {
     mIsPouchForQuest = false;
     for (auto& x : mGrabbedItems)
         x = {};
-    _44504 = {};
-    _44508 = {};
-    _4450c = {};
-    _44510 = {};
-    _44514 = {};
+    mNumSmallSwords = 0;
+    mNumLargeSwords = 0;
+    mNumSpears = 0;
+    mNumBows = 0;
+    mNumShields = 0;
     mRitoSoulItem = {};
     mGoronSoulItem = {};
     mZoraSoulItem = {};
@@ -499,7 +501,7 @@ void PauseMenuDataMgr::doLoadFromGameData() {
     if (was_missing_hero_soul)
         updateDivineBeastClearFlags(num_cleared_beasts);
 
-    mLastAddedItemTab = -1;
+    mLastAddedItemTabIndex = -1;
     mLastAddedItemSlot = -1;
 }
 
@@ -828,6 +830,169 @@ void PauseMenuDataMgr::updateAfterAddingItem(bool only_sort) {
         updateListHeads();
         saveToGameData(items);
     }
+}
+
+void PauseMenuDataMgr::updateInventoryInfo(const sead::OffsetList<PouchItem>& list) {
+    mCanSeeHealthBar = false;
+    for (s32 i = 0; i < NumTabMax; ++i) {
+        mTabs[i] = nullptr;
+        mTabsType[i] = PouchItemType::Invalid;
+    }
+    s32 num_tabs = 0;
+    PouchCategory next_category = PouchCategory::Sword;
+    s32 num_small_swords = 0;
+    s32 num_large_swords = 0;
+    s32 num_bows = 0;
+    s32 num_shields = 0;
+    s32 num_spears = 0;
+
+    bool fairy_checked = false;
+    s32 last_slot = 0;
+    PouchItemType next_tab = PouchItemType::Invalid;
+    PouchItemType previous_tab;
+
+    const auto fill_empty_tabs = [&](PouchCategory cat) {
+        for (s32 i = (s32)next_category; i < (s32)cat; i++) {
+            if (ksys::gdt::getFlag_IsOpenItemCategory(i)) {
+                PouchItemType next_type = getTypeForCategory(cat);
+                // no need to set mTabs here since they are all set to nullptr above
+                mTabsType[num_tabs++] = next_type;
+            }
+        }
+        next_category = cat;
+    };
+
+    for (auto& item: list) {
+        previous_tab = next_tab;
+
+        PouchItemType item_type = item.getType();
+        next_tab = item_type;
+        switch (item_type) {
+            case PouchItemType::Sword: {
+                next_tab = PouchItemType::Sword;
+                ItemUse u = item.getItemUse();
+                if ( u == ItemUse::WeaponSpear) {
+                        num_spears++;
+                } else if (u == ItemUse::WeaponLargeSword) {
+                    num_large_swords++;
+                } else if (u == ItemUse::WeaponSmallSword) {
+                    num_small_swords++;
+                }
+                break;
+            }
+            case PouchItemType::Bow:
+                num_bows++;
+                next_tab = PouchItemType::Bow;
+                break;
+            case PouchItemType::Arrow:
+                break;
+            case PouchItemType::Shield:
+                num_shields++;
+                next_tab = PouchItemType::Shield;
+                break;
+            default:
+                if (isPouchItemArmor(item_type)) {
+                    if (item.isEquipped() && !mCanSeeHealthBar) {
+                        // check health bar
+                        if (item_type == PouchItemType::ArmorHead) {
+                            sead::Buffer<sead::SafeString> buf(sValues.divine_helms.size(), sValues.divine_helms.mBuffer);
+                            if (buf.binarySearch(item.getName()) != -1) {
+                                mCanSeeHealthBar = true;
+                            }
+                        } else if (item_type == PouchItemType::ArmorUpper) {
+                            for (auto& name: sValues.champion_tunics) {
+                                if (name == item.getName()) {
+                                    mCanSeeHealthBar = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    next_tab = PouchItemType::ArmorHead;
+                } else {
+                    if (item.getName() == sValues.Animal_Insect_F) {
+                        auto* global_param = ksys::act::GlobalParameter::instance();
+                        if (global_param) {
+                            auto* gparam = global_param->getGlobalParam();
+                            if (gparam) {
+                                bool is_fairy_at_limit = item.getValue() >= *gparam->mCreateFairyLimitCount;
+                                ksys::gdt::setFlag_FairyCountCheck(is_fairy_at_limit);
+                                fairy_checked = true;
+                            }
+                        }
+                    }
+                }
+                break;
+        }
+
+        bool new_tab_needed = previous_tab != next_tab;
+
+        // add missing tabs before next category, if needed
+        if (new_tab_needed) {
+            switch (next_tab) {
+                case PouchItemType::Sword:
+                    fill_empty_tabs(PouchCategory::Sword);
+                    break;
+                case PouchItemType::Bow:
+                    fill_empty_tabs(PouchCategory::Bow);
+                    break;
+                case PouchItemType::Shield:
+                    fill_empty_tabs(PouchCategory::Shield);
+                    break;
+                case PouchItemType::ArmorHead:
+                    fill_empty_tabs(PouchCategory::Armor);
+                    break;
+                case PouchItemType::Material:
+                    fill_empty_tabs(PouchCategory::Material);
+                    break;
+                case PouchItemType::Food:
+                    fill_empty_tabs(PouchCategory::Food);
+                    break;
+                case PouchItemType::KeyItem:
+                    fill_empty_tabs(PouchCategory::KeyItem);
+                    break;
+                default:
+                    break;
+            }
+        } else if (last_slot >= 20) {
+            new_tab_needed = true;
+        }
+
+        if (new_tab_needed) {
+            mTabs[num_tabs] = &item;
+            last_slot = 0;
+            mTabsType[num_tabs++] = getTypeForCategory(getCategoryForType(item.getType()));
+            if (previous_tab != next_tab) {
+                next_category = PouchCategory(s32(next_category) + 1);
+            }
+        }
+
+        if (&item == mLastAddedItem) {
+            mLastAddedItemTabIndex = num_tabs - 1;
+            mLastAddedItemSlot = last_slot;
+            if (item.getType() == PouchItemType::Arrow) {
+                mLastAddedItemSlot = last_slot - num_bows + ksys::gdt::getFlag_BowPorchStockNum();
+            }
+        }
+
+        last_slot++;
+    }
+
+    if (!fairy_checked) {
+        ksys::gdt::setFlag_FairyCountCheck(false);
+    }
+
+    fill_empty_tabs(PouchCategory::KeyItem);
+
+    mNumSmallSwords = num_small_swords;
+    mNumLargeSwords = num_large_swords;
+    mNumSpears = num_spears;
+    mNumShields = num_shields;
+    mNumBows = num_bows;
+    mNumTabs = num_tabs;
+
+
+
 }
 
 void PauseMenuDataMgr::updateListHeads() {
@@ -1907,6 +2072,27 @@ PouchCategory PauseMenuDataMgr::getCategoryForType(PouchItemType type) const {
         return PouchCategory::KeyItem;
     default:
         return PouchCategory::Invalid;
+    }
+}
+
+PouchItemType PauseMenuDataMgr::getTypeForCategory(PouchCategory category) const {
+    switch (category) {
+    case PouchCategory::Sword:
+        return PouchItemType::Sword;
+    case PouchCategory::Bow:
+        return PouchItemType::Bow;
+    case PouchCategory::Shield:
+        return PouchItemType::Shield;
+    case PouchCategory::Armor:
+        return PouchItemType::ArmorHead;
+    case PouchCategory::Material:
+        return PouchItemType::Material;
+    case PouchCategory::Food:
+        return PouchItemType::Food;
+    case PouchCategory::KeyItem:
+        return PouchItemType::KeyItem;
+    default:
+        return PouchItemType::Sword;
     }
 }
 
