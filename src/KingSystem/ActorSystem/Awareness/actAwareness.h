@@ -35,6 +35,8 @@ public:
     void setEventActive(bool active);
     void calc();
 
+    static u32 calcHash(const sead::SafeString& key);
+
 private:
     friend class AwarenessInstance;
 

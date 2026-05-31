@@ -8,7 +8,7 @@ CameraEventReserveConnectTime::CameraEventReserveConnectTime(const InitArg& arg)
 CameraEventReserveConnectTime::~CameraEventReserveConnectTime() = default;
 
 void CameraEventReserveConnectTime::loadParams_() {
-    getDynamicParam2(&mInterpolateTime_d, "InterpolateTime");
+    getDynamicParam_2(&mInterpolateTime_d, "InterpolateTime");
 }
 
 }  // namespace uking::action

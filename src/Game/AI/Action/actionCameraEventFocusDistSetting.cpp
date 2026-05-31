@@ -8,9 +8,9 @@ CameraEventFocusDistSetting::CameraEventFocusDistSetting(const InitArg& arg)
 CameraEventFocusDistSetting::~CameraEventFocusDistSetting() = default;
 
 void CameraEventFocusDistSetting::loadParams_() {
-    getDynamicParam2(&mClipIndex_d, "ClipIndex");
-    getDynamicParam2(&mFocusDistStart_d, "FocusDistStart");
-    getDynamicParam2(&mFocusDistEnd_d, "FocusDistEnd");
+    getDynamicParam_2(&mClipIndex_d, "ClipIndex");
+    getDynamicParam_2(&mFocusDistStart_d, "FocusDistStart");
+    getDynamicParam_2(&mFocusDistEnd_d, "FocusDistEnd");
 }
 
 void CameraEventFocusDistSetting::calc_() {

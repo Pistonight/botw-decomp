@@ -1,6 +1,7 @@
 #include "KingSystem/ActorSystem/Awareness/actAwarenessDefs.h"
 #include <container/seadSafeArray.h>
 #include <utility/aglParameter.h>
+#include "KingSystem/ActorSystem/Awareness/actAwareness.h"
 
 namespace ksys::act {
 
@@ -28,7 +29,7 @@ sead::SafeArray<const char*, 23> sAwarenessSensorTypes = sead::toArray({
 
 u32 getAwarenessTerrorFlags(u32 hash) {
     for (u32 i = 0; i < u32(sAwarenessTerrorTypes.size()); ++i) {
-        if (agl::utl::ParameterBase::calcHash(sAwarenessTerrorTypes(i)) == hash)
+        if (Awareness::calcHash(sAwarenessTerrorTypes(i)) == hash)
             return 1 << i;
     }
 
@@ -38,7 +39,7 @@ u32 getAwarenessTerrorFlags(u32 hash) {
 
 u32 getAwarenessSensorFlags(u32 hash) {
     for (u32 i = 0; i < u32(sAwarenessSensorTypes.size()); ++i) {
-        if (agl::utl::ParameterBase::calcHash(sAwarenessSensorTypes(i)) == hash)
+        if (Awareness::calcHash(sAwarenessSensorTypes(i)) == hash)
             return 1 << i;
     }
     return 0xffffffff;

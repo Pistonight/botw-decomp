@@ -104,9 +104,9 @@ public:
         return ptr != nullptr;
     }
 
-    // TODO: rename this -- why does this exist?
+    // likely duplicated by compiler?
     template <typename T, AIDefParamType Type>
-    bool getPtrGeneric2(T** value, const sead::SafeString& key) const {
+    bool getPtrGeneric_2(T** value, const sead::SafeString& key) const {
         auto* ptr = static_cast<T*>(getAITreeVariablePointer(key, Type));
         *value = ptr;
         return ptr != nullptr;

@@ -16,7 +16,7 @@ void CameraEventOverwriteNear::leave_() {
 }
 
 void CameraEventOverwriteNear::loadParams_() {
-    getDynamicParam2(&mNear_d, "Near");
+    getDynamicParam_2(&mNear_d, "Near");
 }
 
 }  // namespace uking::action

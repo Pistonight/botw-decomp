@@ -401,7 +401,7 @@ void Object::setRevivalFlagValueIf(ActorData::Flag bit, bool value) {
 }
 
 void Object::setRevivalFlagValue(bool value) {
-    gdt::Manager::instance()->setBool(value, mRevivalGameDataFlagHash);
+    gdt::Manager::instance()->setBoolNoCheck(value, mRevivalGameDataFlagHash);
 }
 
 // NON_MATCHING
