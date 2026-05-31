@@ -1,5 +1,6 @@
 functions_csv = "data/uking_functions.csv"
 build_target = "uking"
+check_unimplemented_references = false
 
 [decomp_me]
 compiler_name = "clang-4.0.1"

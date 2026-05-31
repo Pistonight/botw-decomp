@@ -19,7 +19,7 @@ void RideHorseAI::leave_() {
 }
 
 void RideHorseAI::loadParams_() {
-    getDynamicParam2(&mHasToPlayRidingOnAS_d, "HasToPlayRidingOnAS");
+    getDynamicParam_2(&mHasToPlayRidingOnAS_d, "HasToPlayRidingOnAS");
 }
 
 }  // namespace uking::ai

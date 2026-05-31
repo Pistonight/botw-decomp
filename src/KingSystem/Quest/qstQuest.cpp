@@ -73,7 +73,7 @@ void Quest::x_3() {
         auto* gdm = gdt::Manager::instance();
         if (gdm != nullptr) {
             if (gdm->getBool(handle, &result, true); !result)
-                gdm->setBool(true, handle);
+                gdm->setBoolNoCheck(true, handle);
         }
     }
     _8 = _c;

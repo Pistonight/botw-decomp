@@ -15,7 +15,7 @@ void CameraEventOverwriteFar::leave_() {
 }
 
 void CameraEventOverwriteFar::loadParams_() {
-    getDynamicParam2(&mFar_d, "Far");
+    getDynamicParam_2(&mFar_d, "Far");
 }
 
 }  // namespace uking::action

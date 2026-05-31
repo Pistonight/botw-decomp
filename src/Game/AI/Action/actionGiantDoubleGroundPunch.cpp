@@ -89,7 +89,7 @@ void GiantDoubleGroundPunch::loadParams_() {
     // FIXME: CALL _ZN4sead14PrintFormatter20proceedToFormatMark_EPc @ 0x7100b0bde0
     // FIXME: CALL _ZN4sead14PrintFormatter5flushEv @ 0x7100b0bd94
     // FIXME: CALL sead__PrintFormatter__x @ 0x7100b0c528
-    getDynamicParam2(&mTargetPos_d, "TargetPos");
+    getDynamicParam_2(&mTargetPos_d, "TargetPos");
 }
 
 void GiantDoubleGroundPunch::calc_() {

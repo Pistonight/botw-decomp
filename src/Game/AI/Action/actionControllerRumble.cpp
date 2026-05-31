@@ -10,7 +10,7 @@ void ControllerRumble::enter_(ksys::act::ai::InlineParamPack* params) {
 
 void ControllerRumble::loadParams_() {
     getStaticParam(&mPattern_s, "Pattern");
-    getDynamicParam2(&mCount_d, "Count");
+    getDynamicParam_2(&mCount_d, "Count");
 }
 
 }  // namespace uking::action

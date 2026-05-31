@@ -9,9 +9,9 @@ void CameraRumbleLoop::enter_(ksys::act::ai::InlineParamPack* params) {
 }
 
 void CameraRumbleLoop::loadParams_() {
-    getDynamicParam2(&mPattern_d, "Pattern");
-    getDynamicParam2(&mPower_d, "Power");
-    getDynamicParam2(&mSideways_d, "Sideways");
+    getDynamicParam_2(&mPattern_d, "Pattern");
+    getDynamicParam_2(&mPower_d, "Power");
+    getDynamicParam_2(&mSideways_d, "Sideways");
     getAITreeVariable(&mCamVibId_a, "CamVibId");
 }
 

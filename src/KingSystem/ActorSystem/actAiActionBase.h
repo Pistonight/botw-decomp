@@ -197,6 +197,35 @@ protected:
         return false;
     }
 
+    // likely duplicated by compiler?
+    template <typename T>
+    bool getDynamicParamImpl_2(T* value, const sead::SafeString& key,
+                               bool (ParamPack::*getter)(T* value, const sead::SafeString& key)
+                                   const,
+                               T* default_value) const {
+        auto* action = this;
+        while (action && action->mFlags.isOff(Flag::_80)) {
+            if ((action->mParams.*getter)(value, key))
+                return true;
+            if (action->mFlags.isOff(Flag::DynamicParamChild))
+                goto fail;
+            action = action->getCurrentChild();
+            if (!action)
+                goto fail;
+        }
+
+        for (s32 i = 0, n = action->getNumChildren(); i < n; ++i) {
+            auto* child = action->getChild(i);
+            if (child->getDynamicParamImpl_2<T>(value, key, getter, default_value))
+                return true;
+        }
+
+    fail:
+        logMissingParam(key);
+        *value = *default_value;
+        return false;
+    }
+
     template <AIDefParamType Type, typename T>
     bool getDynamicParamPtrImpl(T** value, const sead::SafeString& key, T* default_value) const {
         return getDynamicParamImpl(value, key, &ParamPack::getPtrGeneric<T, Type>, &default_value);
@@ -246,26 +275,31 @@ protected:
             value, key, static_cast<sead::SafeString*>(getDefaultString32()));
     }
 
-    // TODO: rename -- why do these exist?
+    // likely duplicated by compiler?
     template <AIDefParamType Type, typename T>
-    bool getDynamicParamPtrImpl2(T** value, const sead::SafeString& key, T* default_value) const {
-        return getDynamicParamImpl(value, key, &ParamPack::getPtrGeneric2<T, Type>, &default_value);
+    bool getDynamicParamPtrImpl_2(T** value, const sead::SafeString& key, T* default_value) const {
+        return getDynamicParamImpl_2(value, key, &ParamPack::getPtrGeneric_2<T, Type>,
+                                     &default_value);
     }
 
-    bool getDynamicParam2(int** value, const sead::SafeString& key) const {
-        return getDynamicParamPtrImpl2<AIDefParamType::Int>(value, key, getDefaultInt());
+    // likely duplicated by compiler?
+    bool getDynamicParam_2(int** value, const sead::SafeString& key) const {
+        return getDynamicParamPtrImpl_2<AIDefParamType::Int>(value, key, getDefaultInt());
     }
 
-    bool getDynamicParam2(float** value, const sead::SafeString& key) const {
-        return getDynamicParamPtrImpl2<AIDefParamType::Float>(value, key, getDefaultFloat());
+    // likely duplicated by compiler?
+    bool getDynamicParam_2(float** value, const sead::SafeString& key) const {
+        return getDynamicParamPtrImpl_2<AIDefParamType::Float>(value, key, getDefaultFloat());
     }
 
-    bool getDynamicParam2(sead::Vector3f** value, const sead::SafeString& key) const {
-        return getDynamicParamPtrImpl2<AIDefParamType::Vec3>(value, key, getDefaultVec3());
+    // likely duplicated by compiler?
+    bool getDynamicParam_2(sead::Vector3f** value, const sead::SafeString& key) const {
+        return getDynamicParamPtrImpl_2<AIDefParamType::Vec3>(value, key, getDefaultVec3());
     }
 
-    bool getDynamicParam2(bool** value, const sead::SafeString& key) const {
-        return getDynamicParamPtrImpl2<AIDefParamType::Bool>(value, key, getDefaultBool());
+    // likely duplicated by compiler?
+    bool getDynamicParam_2(bool** value, const sead::SafeString& key) const {
+        return getDynamicParamPtrImpl_2<AIDefParamType::Bool>(value, key, getDefaultBool());
     }
 
     Actor* mActor;
